@@ -5,13 +5,14 @@ import {
   Action,
   showToast,
   Toast,
-  openCommandPreferences,
   Clipboard,
   useNavigation,
+  openCommandPreferences,
 } from "@raycast/api";
 import { useExec, useForm } from "@raycast/utils";
-import ngrok from "ngrok";
-import { config } from "./config";
+
+import { createTunnel } from "../api";
+import { validateDomain, validatePort } from "../utils/validators";
 
 interface FormValues {
   port: string;
@@ -42,11 +43,7 @@ export default function AddTunnel({ revalidate }: Props) {
       });
 
       try {
-        const tunnel = await ngrok.connect({
-          addr: values.port,
-          authtoken: config.authToken,
-          binPath: () => ngrokBin.replace("/ngrok", ""),
-        });
+        const tunnel = await createTunnel(Number(values.port), values.domain, ngrokBin);
 
         await Clipboard.copy(tunnel);
 
@@ -67,19 +64,8 @@ export default function AddTunnel({ revalidate }: Props) {
       }
     },
     validation: {
-      port: (value) => {
-        if (value === "") return "Required field.";
-        const nValue = Number(value);
-        if (isNaN(nValue) || nValue > 65535) return "Enter a valid port.";
-      },
-      domain(value) {
-        if (value) {
-          const regex = /^(?:[a-zA-Z0-9-]{1,63}\.){1,126}(?:[a-zA-Z]{2,63})$/;
-          if (!regex.test(value)) {
-            return "Enter a valid domain.";
-          }
-        }
-      },
+      port: validatePort,
+      domain: validateDomain,
     },
   });
 

@@ -13,7 +13,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "tunnels-list",
+      "name": "index",
       "title": "ngrok Tunnels",
       "subtitle": "ngrok",
       "description": "Put a localhost port on the internet.",
