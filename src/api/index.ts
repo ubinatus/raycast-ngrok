@@ -2,7 +2,7 @@ import ngrok from "ngrok";
 import fetch from "node-fetch";
 
 import { config } from "./config";
-import type { Tunnel, TunnelEditAction } from "./types";
+import type { NgrokError, Tunnel } from "./types";
 
 export * from "./types";
 
@@ -24,7 +24,7 @@ export async function fetchTunnels() {
   });
 
   if (!response.ok) {
-    const err = (await response.json()) as { msg: string };
+    const err = (await response.json()) as NgrokError;
     console.log(err);
     throw new Error(err.msg);
   }
@@ -34,8 +34,8 @@ export async function fetchTunnels() {
   return data;
 }
 
-export async function editTunnel(tunnelSessionId: string, action: TunnelEditAction) {
-  const response = await fetch(`${config.baseUrl}/tunnel_sessions/${tunnelSessionId}/${action}`, {
+export async function stopTunnel(tunnelSessionId: string) {
+  const response = await fetch(`${config.baseUrl}/tunnel_sessions/${tunnelSessionId}/stop`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${config.apiKey}`,
@@ -46,8 +46,10 @@ export async function editTunnel(tunnelSessionId: string, action: TunnelEditActi
   });
 
   if (!response.ok) {
-    const err = (await response.json()) as { msg: string };
+    const err = (await response.json()) as NgrokError;
     console.log(err);
-    throw new Error(err.msg);
+    if (err.error_code !== "ERR_NGROK_810") {
+      throw new Error(err.msg);
+    }
   }
 }

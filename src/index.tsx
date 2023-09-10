@@ -3,30 +3,28 @@ import { ActionPanel, Action, List, showToast, Toast, Icon, useNavigation } from
 import { useTunnels } from "./hooks";
 import AddTunnel from "./components/add-tunnel";
 import BaseActions from "./components/base-actions";
-import { Tunnel, TunnelEditAction, editTunnel } from "./api";
+import { Tunnel, stopTunnel } from "./api";
 
 export default function TunnelsList() {
   const { push } = useNavigation();
 
   const { isLoading: isLoadingTunnels, data, revalidate } = useTunnels();
 
-  const handleTunnel = async (tunnel: Tunnel, action: TunnelEditAction) => {
-    const isRestart = action === TunnelEditAction.restart;
-
+  const handleStop = async (tunnel: Tunnel) => {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: `${isRestart ? "Restarting" : "Stopping"} Tunnel ${tunnel.public_url}...`,
+      title: `Stopping Tunnel ${tunnel.public_url}...`,
     });
 
     try {
-      await editTunnel(tunnel.tunnel_session.id, action);
+      await stopTunnel(tunnel.tunnel_session.id);
 
       toast.style = Toast.Style.Success;
-      toast.title = `Tunnel ${isRestart ? "restarted" : "stopped"}!`;
+      toast.title = "Tunnel stopped!";
     } catch (err) {
       console.log(err);
       toast.style = Toast.Style.Failure;
-      toast.title = `Failed to ${action} tunnel`;
+      toast.title = "Failed to stop tunnel";
       if (err instanceof Error) {
         toast.message = err.message;
       }
@@ -60,14 +58,9 @@ export default function TunnelsList() {
                 <Action.OpenInBrowser url={tunnel.public_url} />
                 <ActionPanel.Section title="Danger zone">
                   <Action
-                    title="Restart Tunnel"
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    onAction={() => handleTunnel(tunnel, TunnelEditAction.restart)}
-                  />
-                  <Action
                     title="Stop Tunnel"
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
-                    onAction={() => handleTunnel(tunnel, TunnelEditAction.stop)}
+                    onAction={() => handleStop(tunnel)}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>

@@ -15,7 +15,11 @@ export type Tunnel = {
   forwards_to: string;
 };
 
-export enum TunnelEditAction {
-  restart = "restart",
-  stop = "stop",
-}
+export type NgrokError = {
+  error_code: string;
+  status_code: number;
+  msg: string;
+  details: {
+    operation_id: string;
+  };
+};
