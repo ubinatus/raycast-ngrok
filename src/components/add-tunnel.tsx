@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { useExec, useForm } from "@raycast/utils";
 
-import { createTunnel, checkIsNgrokReady, connectNgrok } from "../api";
+import { createTunnel, checkIsNgrokReady, connectNgrok, ReservedDomain } from "../api";
 import { validateDomain, validateLabel, validatePort } from "../utils/validators";
 
 interface FormValues {
@@ -22,9 +22,10 @@ interface FormValues {
 
 type Props = {
   revalidate: () => void;
+  domains: ReservedDomain[];
 };
 
-export default function AddTunnel({ revalidate }: Props) {
+export default function AddTunnel({ revalidate, domains }: Props) {
   const { pop } = useNavigation();
 
   const { data: ngrokBin } = useExec("which", ["ngrok"]);
@@ -44,11 +45,11 @@ export default function AddTunnel({ revalidate }: Props) {
       });
 
       try {
-        const isReady = await checkIsNgrokReady()
+        const isReady = await checkIsNgrokReady();
         if (!isReady) {
           toast.title = `Starting ngrok service...`;
-          await connectNgrok()
-          toast.title = `Connecting Tunnel to Port ${values.port}...`
+          await connectNgrok();
+          toast.title = `Connecting Tunnel to Port ${values.port}...`;
         }
 
         const tunnel = await createTunnel(Number(values.port), values.domain, values.label);
@@ -90,8 +91,17 @@ export default function AddTunnel({ revalidate }: Props) {
     >
       <Form.Description text="Create an ngrok tunnel" />
       <Form.TextField title="Port" placeholder="Enter the localhost port to expose" {...itemProps.port} />
-      <Form.TextField title="Domain" placeholder="(optional) Enter a custom domain" {...itemProps.domain} />
       <Form.TextField title="Label" placeholder="(optional) Enter a label for this tunnel" {...itemProps.label} />
+      <Form.Dropdown title="Domain" {...itemProps.domain}>
+        <Form.Dropdown.Item value="" title="No domain" />
+        {domains.length > 0 && (
+          <Form.Dropdown.Section title="Reserved domains">
+            {domains.map((domain) => (
+              <Form.Dropdown.Item key={domain.id} value={domain.domain} title={domain.domain} />
+            ))}
+          </Form.Dropdown.Section>
+        )}
+      </Form.Dropdown>
     </Form>
   );
 }
