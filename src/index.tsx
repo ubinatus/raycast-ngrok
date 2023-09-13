@@ -51,7 +51,7 @@ export default function TunnelsList() {
           <List.Item
             key={tunnel.id}
             title={tunnel.public_url}
-            subtitle={`Forwards to ➡️ ${tunnel.forwards_to}`}
+            subtitle={`Forwards to ➡️ ${tunnel.forwards_to}${tunnel.metadata ? ` - [${tunnel.metadata}]` : ""}`}
             actions={
               <ActionPanel title={tunnel.public_url}>
                 <Action.CopyToClipboard title="Copy URL" content={tunnel.public_url} />

@@ -13,6 +13,7 @@ export type Tunnel = {
     uri: string;
   };
   forwards_to: string;
+  metadata: string
 };
 
 export type NgrokError = {
