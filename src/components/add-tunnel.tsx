@@ -11,11 +11,12 @@ import {
 } from "@raycast/api";
 import { useExec, useForm } from "@raycast/utils";
 
-import { createTunnel } from "../api";
-import { validateDomain, validatePort } from "../utils/validators";
+import { createTunnel, checkIsNgrokReady, connectNgrok } from "../api";
+import { validateDomain, validateLabel, validatePort } from "../utils/validators";
 
 interface FormValues {
   port: string;
+  label?: string;
   domain?: string;
 }
 
@@ -39,11 +40,18 @@ export default function AddTunnel({ revalidate }: Props) {
       }
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: `Connecting Tunnel to Port ${values.port}...`,
+        title: `Connecting ngrok service...`,
       });
 
       try {
-        const tunnel = await createTunnel(Number(values.port), values.domain, ngrokBin);
+        const isReady = await checkIsNgrokReady()
+        if (!isReady) {
+          toast.title = `Starting ngrok service...`;
+          await connectNgrok()
+          toast.title = `Connecting Tunnel to Port ${values.port}...`
+        }
+
+        const tunnel = await createTunnel(Number(values.port), values.domain, values.label);
 
         await Clipboard.copy(tunnel);
 
@@ -66,6 +74,7 @@ export default function AddTunnel({ revalidate }: Props) {
     validation: {
       port: validatePort,
       domain: validateDomain,
+      label: validateLabel,
     },
   });
 
@@ -82,6 +91,7 @@ export default function AddTunnel({ revalidate }: Props) {
       <Form.Description text="Create an ngrok tunnel" />
       <Form.TextField title="Port" placeholder="Enter the localhost port to expose" {...itemProps.port} />
       <Form.TextField title="Domain" placeholder="(optional) Enter a custom domain" {...itemProps.domain} />
+      <Form.TextField title="Label" placeholder="(optional) Enter a label for this tunnel" {...itemProps.label} />
     </Form>
   );
 }
