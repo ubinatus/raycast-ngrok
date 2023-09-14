@@ -69,9 +69,11 @@ export default function TunnelsList() {
                 <Action.OpenInBrowser url={tunnel.public_url} />
                 <ActionPanel.Section title="Danger zone">
                   <Action
+                    icon={Icon.Stop}
                     title="Stop Tunnel"
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
                     onAction={() => handleStop(tunnel)}
+                    style={Action.Style.Destructive}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
