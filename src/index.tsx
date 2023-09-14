@@ -1,9 +1,9 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, useNavigation } from "@raycast/api";
 
-import { useReservedDomains, useTunnels } from "./hooks";
+import { Tunnel, stopTunnel } from "./api";
 import AddTunnel from "./components/add-tunnel";
 import BaseActions from "./components/base-actions";
-import { Tunnel, stopTunnel } from "./api";
+import { useReservedDomains, useTunnels } from "./hooks";
 
 export default function TunnelsList() {
   const { push } = useNavigation();
