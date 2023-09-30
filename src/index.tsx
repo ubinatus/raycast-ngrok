@@ -4,6 +4,7 @@ import { stopTunnel, stopTunnelAgent } from "./api";
 import AddTunnel from "./components/add-tunnel";
 import BaseActions from "./components/base-actions";
 import { useReservedDomains, useTunnelSessions } from "./hooks";
+import StopAgentAction from "./components/stop-agent-action";
 
 export default function TunnelsList() {
   const { push } = useNavigation();
@@ -14,29 +15,6 @@ export default function TunnelsList() {
     revalidate: revalidateTunelSessions,
   } = useTunnelSessions();
   const { isLoading: isLoadingDomains, data: dataDomains, revalidate: revalidateDomains } = useReservedDomains();
-
-  const handleStopAgent = async (tunnelSessionId: string) => {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: `Stopping Agent ${tunnelSessionId}...`,
-    });
-
-    try {
-      await stopTunnelAgent(tunnelSessionId);
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Agent stopped!";
-    } catch (err) {
-      console.log(err);
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to stop agent";
-      if (err instanceof Error) {
-        toast.message = err.message;
-      }
-    }
-
-    revalidateTunelSessions();
-  };
 
   const handleStopTunnel = async (tunnelUrl: string, tunnelName: string) => {
     const toast = await showToast({
@@ -107,12 +85,9 @@ export default function TunnelsList() {
                           style={Action.Style.Destructive}
                         />
                       )}
-                      <Action
-                        icon={Icon.Stop}
-                        title="Stop Session"
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                        onAction={() => handleStopAgent(tunnel.tunnel_session.id)}
-                        style={Action.Style.Destructive}
+                      <StopAgentAction
+                        tunnelSessionId={data.session.id}
+                        revalidateTunelSessions={revalidateTunelSessions}
                       />
                     </ActionPanel.Section>
                     <ActionPanel.Section>
