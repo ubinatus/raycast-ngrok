@@ -1,10 +1,10 @@
 import fetch, { FetchError } from "node-fetch";
 import { config } from "./config";
-import { LocalTunnel, NgrokError } from "./types";
+import { LocalTunnel } from "./types";
 
 export async function checkIsNgrokReady() {
   try {
-    const response = await fetch(`${config.localApi}/api/tunnels`);
+    const response = await fetch(`${config.localApi}/api`);
     return response.ok;
   } catch {
     return false;
@@ -28,11 +28,8 @@ export async function createTunnel(port: number, domain: string | undefined, lab
     });
 
     if (!response.ok) {
-      const err = (await response.json()) as NgrokError;
-      console.log(err);
-      if (err.error_code !== "ERR_NGROK_810") {
-        throw new Error(err.msg);
-      }
+      const errMsg = await response.text();
+      throw new Error(errMsg);
     }
 
     const data = (await response.json()) as { public_url: string };
@@ -47,20 +44,21 @@ export async function createTunnel(port: number, domain: string | undefined, lab
 
 export async function fetchLocalTunnels() {
   try {
+    const isReady = await checkIsNgrokReady();
+    if (!isReady) return [];
+
     const response = await fetch(`${config.localApi}/api/tunnels`);
 
     if (!response.ok) {
       const err = await response.json();
-      console.log(err);
+      console.error(err);
     }
 
     const data = (await response.json()) as { tunnels: LocalTunnel[] };
 
-    console.log("Local tunnels are:", data.tunnels);
-
     return data.tunnels;
   } catch (e) {
-    console.log("failed local fetch tunnels", e);
+    console.error(e);
     return [];
   }
 }
@@ -72,7 +70,7 @@ export async function stopTunnel(tunnelName: string) {
 
   if (!response.ok) {
     const err = (await response.json()) as FetchError;
-    console.log(err);
+    console.error(err);
     throw new Error(err.message);
   }
 }

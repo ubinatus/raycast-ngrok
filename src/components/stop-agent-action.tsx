@@ -34,7 +34,7 @@ export default function StopAgentAction({ tunnelSessionId, revalidateTunelSessio
       toast.style = Toast.Style.Success;
       toast.title = "Agent stopped!";
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to stop agent";
       if (err instanceof Error) {

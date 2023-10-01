@@ -6,7 +6,7 @@ import { config } from "./config";
 import type { NgrokError, ReservedDomain, Tunnel, TunnelSession } from "./types";
 
 export * from "./agent";
-export type * from "./types";
+export * from "./types";
 
 export async function connectNgrok() {
   await runAppleScript(`
@@ -28,7 +28,7 @@ export async function fetchTunnelSessions() {
 
   if (!response.ok) {
     const err = (await response.json()) as NgrokError;
-    console.log(err);
+    console.error(err);
     throw new Error(err.msg);
   }
 
@@ -47,7 +47,7 @@ export async function fetchTunnels() {
 
   if (!response.ok) {
     const err = (await response.json()) as NgrokError;
-    console.log(err);
+    console.error(err);
     throw new Error(err.msg);
   }
 
@@ -69,7 +69,7 @@ export async function stopTunnelAgent(tunnelSessionId: string) {
 
   if (!response.ok) {
     const err = (await response.json()) as NgrokError;
-    console.log(err);
+    console.error(err);
     if (err.error_code !== "ERR_NGROK_810") {
       throw new Error(err.msg);
     }
@@ -86,7 +86,7 @@ export async function fetchReservedDomains() {
 
   if (!response.ok) {
     const err = (await response.json()) as NgrokError;
-    console.log(err);
+    console.error(err);
     throw new Error(err.msg);
   }
 
