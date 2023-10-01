@@ -8,6 +8,7 @@ import {
   StopAgentAction,
   StopTunnelAction,
 } from "./components";
+import { formatDate } from "./utils/date";
 import { useReservedDomains, useTunnelSessions } from "./hooks";
 
 export default function TunnelsList() {
@@ -37,7 +38,11 @@ export default function TunnelsList() {
         />
       ) : (
         dataSessions.map((session) => (
-          <List.Section key={session.id} title="Agent Session" subtitle={session.id.slice(3)}>
+          <List.Section
+            key={session.id}
+            title={`Session ${session.id.slice(3)}`}
+            subtitle={`Started on ${formatDate(new Date(session.started_at))}`}
+          >
             {session.tunnels.length === 0 ? (
               <EmptyTunnelsView
                 tunnelSessionId={session.id}
